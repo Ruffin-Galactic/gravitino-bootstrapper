@@ -32,3 +32,11 @@ jobs:
 
       - name: Push Docker image
         run: docker push $IMAGE
+      - name: Save image as tarball
+        run: docker save $IMAGE -o gravitino.tar
+      - name: Upload tarball to release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: gravitino.tar
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
