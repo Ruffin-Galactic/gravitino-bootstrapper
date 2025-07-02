@@ -1,18 +1,28 @@
-FROM openjdk:17-slim
+# Stage 1: Python build layer
+FROM python:3.11-slim as bootstrapper
 
-# Install Gravitino manually
-RUN curl -sSLhttps://dlcdn.apache.org/incubator/gravitino/0.9.0-incubating/gravitino-0.9.0-incubating-bin.tar.gz \
-  | tar -xz -C /opt/ && \
-  ln -s /opt/apache-gravitino-*/ /opt/gravitino
+# Install required Python packages
+RUN pip install --no-cache-dir psycopg2-binary requests
 
-# Install Python and bootstrap tools
-RUN apt-get update && apt-get install -y python3 python3-pip && \
-    pip3 install psycopg2-binary requests && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
-
-# Copy bootstrap scripts
+# Copy bootstrap script
 COPY bootstrap/init.py /opt/bootstrap/init.py
 COPY entrypoint.sh /opt/bootstrap/entrypoint.sh
 
-WORKDIR /opt/gravitino
+# Stage 2: Gravitino base + bootstrap
+FROM apache/gravitino:0.9.0-incubating
+
+# Copy Python runtime from Stage 1
+COPY --from=bootstrapper /usr/local/lib/python3.11 /usr/local/lib/python3.11
+COPY --from=bootstrapper /usr/local/bin/python3 /usr/local/bin/python3
+COPY --from=bootstrapper /usr/local/bin/pip /usr/local/bin/pip
+COPY --from=bootstrapper /usr/local/bin/__pycache__ /usr/local/bin/__pycache__
+COPY --from=bootstrapper /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
+
+# Copy bootstrap script
+COPY --from=bootstrapper /opt/bootstrap/ /opt/bootstrap/
+
+# Set permissions (optional)
+RUN chmod +x /opt/bootstrap/entrypoint.sh
+
+# Entrypoint includes Gravitino startup + Python bootstrap
 ENTRYPOINT ["/opt/bootstrap/entrypoint.sh"]
