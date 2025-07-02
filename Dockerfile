@@ -1,7 +1,7 @@
 FROM openjdk:17-slim
 
 # Install Gravitino manually
-RUN curl -sSL https://downloads.apache.org/gravitino/0.9.0-incubating/apache-gravitino-0.9.0-incubating-bin.tar.gz \
+RUN curl -sSLhttps://dlcdn.apache.org/incubator/gravitino/0.9.0-incubating/gravitino-0.9.0-incubating-bin.tar.gz \
   | tar -xz -C /opt/ && \
   ln -s /opt/apache-gravitino-*/ /opt/gravitino
 
