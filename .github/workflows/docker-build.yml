@@ -29,14 +29,22 @@ jobs:
 
       - name: Build Docker image
         run: docker build -t $IMAGE .
-
+      - name: Create tag (latest)
+        run: |
+            git config user.name "github-actions"
+            git config user.email "github-actions@github.com"
+            git tag -f latest
+            git push -f origin latest
       - name: Push Docker image
         run: docker push $IMAGE
       - name: Save image as tarball
         run: docker save $IMAGE -o gravitino.tar
-      - name: Upload tarball to release
+      - name: Create GitHub Release (latest)
         uses: softprops/action-gh-release@v2
         with:
-          files: gravitino.tar
+          tag_name: latest
+          name: Gravitino Bootstrapper
+          body: |
+            This release includes the latest container image tarball.
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
