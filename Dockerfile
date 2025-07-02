@@ -15,7 +15,6 @@ FROM apache/gravitino:0.9.0-incubating
 COPY --from=bootstrapper /usr/local/lib/python3.11 /usr/local/lib/python3.11
 COPY --from=bootstrapper /usr/local/bin/python3 /usr/local/bin/python3
 COPY --from=bootstrapper /usr/local/bin/pip /usr/local/bin/pip
-COPY --from=bootstrapper /usr/local/bin/__pycache__ /usr/local/bin/__pycache__
 COPY --from=bootstrapper /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
 
 # Copy bootstrap script
