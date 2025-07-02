@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       packages: write
-      contents: read
+      contents: write
 
     steps:
       - name: Checkout code
@@ -29,22 +29,38 @@ jobs:
 
       - name: Build Docker image
         run: docker build -t $IMAGE .
-      - name: Create tag (latest)
-        run: |
-            git config user.name "github-actions"
-            git config user.email "github-actions@github.com"
-            git tag -f latest
-            git push -f origin latest
-      - name: Push Docker image
+        
+      - name: Push image to GHCR
         run: docker push $IMAGE
-      - name: Save image as tarball
+
+      - name: Save image to tarball
         run: docker save $IMAGE -o gravitino.tar
-      - name: Create GitHub Release (latest)
+
+      - name: Tag commit as 'latest' and push
+        run: |
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor }}@users.noreply.github.com"
+          git tag -f latest
+          git push -f origin latest
+
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: latest
           name: Gravitino Bootstrapper
           body: |
-            This release includes the latest container image tarball.
+            This release includes the latest Gravitino bootstrapper image.
+            Load it locally with:
+            ```
+            curl -L -o gravitino.tar https://github.com/${{ github.repository }}/releases/download/latest/gravitino.tar
+            docker load -i gravitino.tar
+            ```
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload tarball to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: gravitino.tar
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
