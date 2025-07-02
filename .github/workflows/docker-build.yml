@@ -25,7 +25,7 @@ jobs:
 
       - name: Set image name
         id: meta
-        run: echo "IMAGE=ghcr.io/ruffin-galactic/gravitino:latest" >> $GITHUB_ENV
+        run: echo "IMAGE=ghcr.io/prasanth-galactic/gravitino:latest" >> $GITHUB_ENV
 
       - name: Build Docker image
         run: docker build -t $IMAGE .
