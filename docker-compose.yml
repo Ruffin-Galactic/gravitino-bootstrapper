@@ -1,0 +1,16 @@
+services:
+  gravitino:
+    image: ghcr.io/Ruffin-Galactic/gravitino:latest
+    depends_on:
+      - postgres
+    ports:
+      - "8090:8090"
+    environment:
+      GRAVITINO_CATALOG_DB_URL: postgres://admin:secret@postgres:5432/catalog_config
+    volumes:
+      - ./bootstrap:/opt/bootstrap  # mount init.py
+      - ./entrypoint.sh:/opt/bootstrap/entrypoint.sh
+    entrypoint: ["/opt/bootstrap/entrypoint.sh"]
+
+volumes:
+  pgdata:
